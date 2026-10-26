@@ -1,6 +1,7 @@
 # Data and training artefacts (datasets are downloaded by scripts/download_data.sh)
 /data/
 /runs/
+/models/
 *.pth
 *.pt
 

@@ -29,6 +29,7 @@ OUT_IMAGES = Path("data/processed/images")
 SPLITS = Path("splits")
 MAX_SIDE = 512
 NEAR_DUP_BITS = 2  # dHash Hamming distance treated as the same image
+NOTES: dict[str, int] = {}  # counts that are not dropped images
 
 
 @dataclass
@@ -65,7 +66,7 @@ def batch1_items(z: zipfile.ZipFile, report: Counter) -> list[Item]:
         index = min(int(r["patient_index"]) for r in records)
         items.append(Item(f"b1-{index:04d}", "batch1", int(records[0]["histo_label"]),
                           f"dataset/{row['path']}"))
-    report["batch1: names shared by several patients (merged into one group)"] = sum(
+    NOTES["batch1: names shared by patients with the same label (merged into one group)"] = sum(
         len(v) > 1 and len({r["histo_label"] for r in v}) == 1 for v in by_name.values()
     )
     return items
@@ -193,6 +194,7 @@ def main() -> None:
             for s in ("batch1", "batch2") for l in (0, 1)
         },
         "dropped": dict(sorted(report.items())),
+        "notes": NOTES,
     }
     (SPLITS / "prepare_report.json").write_text(json.dumps(summary, indent=2) + "\n")
     print(json.dumps(summary, indent=2))

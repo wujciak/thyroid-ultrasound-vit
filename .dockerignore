@@ -1,0 +1,11 @@
+# Backend image is built from the repo root; only pyproject.toml, README.md, src/ and app/backend are used.
+.git
+.venv
+data
+runs
+models
+thesis
+notebooks
+splits
+app/frontend
+**/__pycache__

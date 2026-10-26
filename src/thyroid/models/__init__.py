@@ -16,7 +16,7 @@ from thyroid.models.vit_thesis import VisionTransformers
 
 @dataclass(frozen=True)
 class Spec:
-    build: Callable[[], nn.Module]
+    build: Callable[..., nn.Module]  # build(imagenet=False) skips the download when loading a checkpoint
     img_size: int
     lr: float
     epochs: int
@@ -24,16 +24,16 @@ class Spec:
     pretrained: bool
 
 
-def _timm(name: str) -> Callable[[], nn.Module]:
-    return lambda: timm.create_model(name, pretrained=True, in_chans=1, num_classes=2)
+def _timm(name: str) -> Callable[..., nn.Module]:
+    return lambda imagenet=True: timm.create_model(name, pretrained=imagenet, in_chans=1, num_classes=2)
 
 
 MODELS: dict[str, Spec] = {
-    "cnn_thesis": Spec(lambda: ThesisCNN(img_size=256), 256, lr=1e-3, epochs=40,
+    "cnn_thesis": Spec(lambda imagenet=True: ThesisCNN(img_size=256), 256, lr=1e-3, epochs=40,
                        weight_decay=1e-4, pretrained=False),
     "vit_thesis": Spec(
-        lambda: VisionTransformers(img_size=256, patch_size=16, in_chans=1, n_classes=2,
-                                   embed_dim=768, depth=12, n_heads=12, p=0.1, attn_p=0.1),
+        lambda imagenet=True: VisionTransformers(img_size=256, patch_size=16, in_chans=1, n_classes=2,
+                                                 embed_dim=768, depth=12, n_heads=12, p=0.1, attn_p=0.1),
         256, lr=1e-4, epochs=60, weight_decay=0.05, pretrained=False,
     ),
     "resnet50": Spec(_timm("resnet50.a1_in1k"), 224, lr=1e-4, epochs=25,

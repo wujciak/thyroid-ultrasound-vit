@@ -1,10 +1,10 @@
 import React, { useRef, useState } from "react";
-import { predictImage } from "../services/api";
+import { predictImage, Prediction } from "../services/api";
 
 interface HistoryItem {
   id: string;
   fileName: string;
-  result: number;
+  result: Prediction;
   timestamp: Date;
   imageUrl: string;
 }
@@ -12,7 +12,7 @@ interface HistoryItem {
 const ImageUpload = () => {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
-  const [result, setResult] = useState<number | null>(null);
+  const [result, setResult] = useState<Prediction | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [history, setHistory] = useState<HistoryItem[]>([]);
@@ -42,19 +42,18 @@ const ImageUpload = () => {
     setError(null);
     try {
       const res = await predictImage(file);
-      setResult(res.prediction);
-      
-      // Add to history (mock functionality)
+      setResult(res);
+
       const newHistoryItem: HistoryItem = {
         id: Date.now().toString(),
         fileName: file.name,
-        result: res.prediction,
+        result: res,
         timestamp: new Date(),
         imageUrl: preview || '',
       };
       setHistory(prev => [newHistoryItem, ...prev].slice(0, 5));
     } catch (err) {
-      setError("Prediction failed");
+      setError(err instanceof Error ? err.message : "Prediction failed");
     }
     setLoading(false);
   };
@@ -75,9 +74,9 @@ const ImageUpload = () => {
           {/* Header */}
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
-              AI Thyroid Diagnosis
+              Thyroid Nodule Classifier
             </h1>
-            <p className="text-gray-600 text-lg">Advanced ultrasound image classification using machine learning</p>
+            <p className="text-gray-600 text-lg">Research demo: benign vs malignant from a single ultrasound frame</p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-8">
@@ -154,9 +153,9 @@ const ImageUpload = () => {
               </form>
 
               {result !== null && (
-                <div className={`mt-6 p-4 rounded-xl text-center ${result === 0 ? "bg-green-50 border-2 border-green-200" : "bg-red-50 border-2 border-red-200"}`}>
-                  <div className={`text-2xl font-bold ${result === 0 ? "text-green-700" : "text-red-700"}`}>
-                    {result === 0 ? (
+                <div className={`mt-6 p-4 rounded-xl text-center ${result.label === "benign" ? "bg-green-50 border-2 border-green-200" : "bg-red-50 border-2 border-red-200"}`}>
+                  <div className={`text-2xl font-bold ${result.label === "benign" ? "text-green-700" : "text-red-700"}`}>
+                    {result.label === "benign" ? (
                       <div className="flex items-center justify-center">
                         <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
                         Benign
@@ -168,8 +167,12 @@ const ImageUpload = () => {
                       </div>
                     )}
                   </div>
-                  <p className="text-sm text-gray-600 mt-2">
-                    {result === 0 ? "The AI model suggests this nodule appears benign." : "The AI model suggests this nodule may be malignant. Please consult with a medical professional."}
+                  <p className="text-sm text-gray-700 mt-2">
+                    Probability of malignancy: <span className="font-semibold">{(result.probability_malignant * 100).toFixed(1)}%</span>
+                    {" "}(decision threshold {(result.threshold * 100).toFixed(1)}%, model {result.model})
+                  </p>
+                  <p className="text-xs text-gray-500 mt-2">
+                    Research demo, not a medical device. It must not be used for diagnosis.
                   </p>
                 </div>
               )}
@@ -206,8 +209,8 @@ const ImageUpload = () => {
                         />
                         <div className="flex-1">
                           <div className="font-medium text-gray-800 truncate">{item.fileName}</div>
-                          <div className={`text-sm font-semibold ${item.result === 0 ? "text-green-600" : "text-red-600"}`}>
-                            {item.result === 0 ? "Benign" : "Malignant"}
+                          <div className={`text-sm font-semibold ${item.result.label === "benign" ? "text-green-600" : "text-red-600"}`}>
+                            {item.result.label === "benign" ? "Benign" : "Malignant"} ({(item.result.probability_malignant * 100).toFixed(0)}%)
                           </div>
                           <div className="text-xs text-gray-500">
                             {item.timestamp.toLocaleDateString()} {item.timestamp.toLocaleTimeString()}

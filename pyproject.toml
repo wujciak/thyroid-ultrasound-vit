@@ -16,7 +16,12 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev = ["ruff"]
+dev = [
+    "ipykernel>=7.4.0",
+    "matplotlib>=3.11.2",
+    "nbconvert>=7.17.2",
+    "ruff",
+]
 
 [build-system]
 requires = ["hatchling"]
