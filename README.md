@@ -5,6 +5,7 @@
 ![FastAPI](https://img.shields.io/badge/FastAPI-serving-009688?logo=fastapi&logoColor=white)
 ![React](https://img.shields.io/badge/React-UI-61DAFB?logo=react&logoColor=black)
 ![uv](https://img.shields.io/badge/uv-managed-DE5FE9)
+![License](https://img.shields.io/badge/License-MIT-blue)
 
 Benign vs malignant classification of thyroid nodules from ultrasound frames, comparing Vision
 Transformers and CNNs with **patient-level** evaluation on histopathology-labelled data, plus a
@@ -121,3 +122,7 @@ splits/                manifest and patient split (no personal data)
 - All data comes from one published dataset. There is no external test set from another hospital, so
   the numbers say nothing about generalisation to other scanners or populations.
 - Labels are per patient; individual frames may not show the diagnosed nodule.
+
+## License
+
+[MIT](LICENSE)
