@@ -1,0 +1,31 @@
+{
+  "images": 7813,
+  "patients": 785,
+  "by_source_and_label": {
+    "batch1/benign": {
+      "images": 1992,
+      "patients": 216
+    },
+    "batch1/malignant": {
+      "images": 3914,
+      "patients": 383
+    },
+    "batch2/benign": {
+      "images": 616,
+      "patients": 66
+    },
+    "batch2/malignant": {
+      "images": 1291,
+      "patients": 120
+    }
+  },
+  "dropped": {
+    "batch1: image without label": 21,
+    "batch1: names shared by several patients (merged into one group)": 3,
+    "batch2: files in patient folders not listed as ultrasound frames": 773,
+    "batch2: image without label": 10,
+    "batch2: missing or corrupt in the published archive": 6,
+    "near-duplicate across different patients (all copies dropped)": 10,
+    "near-duplicate within one patient (extra copies dropped)": 123
+  }
+}
