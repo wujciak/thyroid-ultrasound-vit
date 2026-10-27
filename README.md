@@ -129,7 +129,8 @@ seconds: add `--smoke`.
 FastAPI backend and React frontend. The backend loads an exported model and returns the
 malignancy probability together with the validation-chosen threshold. The served model is the
 single ViT-B/16 fold with the best validation AUROC (fold 1: 0.679 validation, 0.651 test per
-frame). The ensemble numbers above need all five models.
+frame). The ensemble numbers above need all five models. Weights are not distributed: train
+and export a model first (see [Reproduce](#reproduce)).
 
 ```bash
 cd app
