@@ -1,0 +1,17 @@
+# Data and training artefacts (datasets are downloaded by scripts/download_data.sh)
+/data/*
+!/data/splits/
+/runs/
+/models/
+*.pth
+*.pt
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.ipynb_checkpoints/
+
+# Frontend
+node_modules/
+/app/frontend/build/

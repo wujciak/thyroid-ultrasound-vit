@@ -1,0 +1,26 @@
+# Run from app/:  MODEL=vit_b16 docker compose up --build
+# Expects models/<MODEL>.pt in the repo root (uv run python -m thyroid.export --model <MODEL>).
+services:
+  backend:
+    build:
+      context: ..
+      dockerfile: app/backend/Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../models:/models:ro
+    environment:
+      MODEL_PATH: /models/${MODEL:-vit_b16}.pt
+      ALLOWED_ORIGINS: http://localhost:3000
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        REACT_APP_API_URL: http://localhost:8000
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
