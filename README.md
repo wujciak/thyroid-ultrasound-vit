@@ -17,13 +17,55 @@ folder was a copy of its training folder, and the CNN metrics were computed on m
 This repository is the thesis redone properly. The original notebooks are kept unchanged in
 [`thesis/`](thesis/), with a list of what was wrong in them.
 
-<!-- TODO after training: headline result (best model, test AUROC image / patient) and ROC figure -->
+**Result:** an ImageNet-pretrained ViT-B/16 reaches **0.75 AUROC per patient** (0.68 per frame) on
+157 held-out patients. The thesis architectures trained from scratch stay at chance level, so the
+thesis' original result does not hold up under patient-level evaluation.
+
+![ROC curves on the held-out test set](results/figures/roc.png)
 
 ## Results
 
-<!-- TODO after training: paste results/summary.md, ROC curves and Grad-CAM from notebooks/02_results.ipynb -->
+Held-out test set, 157 patients / 1473 frames. *Ensemble* averages the scores of the 5 fold
+models; *fold mean* is mean ± std of the 5 models evaluated separately. Patient level uses the
+mean score over a patient's frames.
 
-*Training in progress.*
+| Model | AUROC patient (ensemble) | AUROC patient (fold mean) | AUROC frame (ensemble) | AUROC frame (fold mean) |
+| --- | --: | --: | --: | --: |
+| **`vit_b16`** | **0.752** | **0.724 ± 0.027** | **0.684** | **0.652 ± 0.026** |
+| `resnet50` | 0.696 | 0.678 ± 0.018 | 0.630 | 0.612 ± 0.011 |
+| `cnn_thesis` | 0.619 | 0.578 ± 0.061 | 0.550 | 0.533 ± 0.029 |
+| `vit_thesis` | 0.457 | 0.461 ± 0.015 | 0.449 | 0.456 ± 0.005 |
+
+AUPRC, sensitivity, specificity and balanced accuracy at the validation-chosen threshold are in
+[`results/summary.md`](results/summary.md). Analysis in
+[`notebooks/02_results.ipynb`](notebooks/02_results.ipynb):
+
+- **Pretraining is what makes this work.** About 6000 training frames are not enough to train
+  the thesis ViT or CNN from random weights.
+- **Fast overfitting.** The pretrained models peak at validation within 2–11 epochs.
+- **Per batch,** ViT-B/16 reaches 0.79 per patient on batch 1 (120 test patients) and 0.62 on
+  batch 2. With only 37 test patients, the batch 2 number is uncertain by about ±0.1.
+
+### Does the model look at the nodule?
+
+Ultrasound frames carry burned-in scanner overlays that could serve as shortcuts. Two checks on
+the best ViT-B/16 fold model:
+
+| Frames scored with | AUROC (400 test frames) |
+| --- | --: |
+| full frame | 0.657 |
+| header (date, exam number) blacked out | 0.650 |
+| only the central 60% × 60% box | 0.648 |
+| central box blacked out | 0.592 |
+
+The header is not used, and almost all of the signal sits in the central region where the nodule
+is. Grad-CAM agrees: malignant predictions focus on hypoechoic spots inside the nodule, and benign
+ones on the walls of cystic nodules. Reliance on calipers or Doppler boxes inside the
+central region is not ruled out.
+
+![Grad-CAM of ViT-B/16 on confident test predictions](results/figures/gradcam_vit_b16.png)
+
+*The top 9% of each frame (date and exam number) is masked in the figure only.*
 
 ## Data
 
@@ -55,7 +97,7 @@ Cleaning (details and counts in [`notebooks/01_data.ipynb`](notebooks/01_data.ip
 
 - **Splits:** 157 test patients (20%) are held out. The remaining 628 patients form 5 folds
   (`StratifiedGroupKFold` on source × label), so no patient is ever in two splits. The split is
-  committed in [`splits/`](splits/).
+  committed in [`data/splits/`](data/splits/).
 - **Training:** each model is trained 5 times, once per fold. Fold *k* is validation, used for
   early stopping (image AUROC) and for the decision threshold (Youden's J). The other folds are
   training data. AdamW, cosine schedule with warmup, class-weighted loss, light augmentation
@@ -72,8 +114,8 @@ Requires [uv](https://docs.astral.sh/uv/) and an NVIDIA GPU for training.
 ```bash
 uv sync
 ./scripts/download_data.sh                 # 1.9 GB from Figshare, MD5-checked
-uv run python -m thyroid.data.prepare      # -> data/processed/, splits/manifest.csv
-uv run python -m thyroid.data.splits       # -> splits/patients.csv (already committed)
+uv run python -m thyroid.data.prepare      # -> data/processed/, data/splits/manifest.csv
+uv run python -m thyroid.data.splits       # -> data/splits/patients.csv (already committed)
 
 ./scripts/train_all.sh                     # 4 models x 5 folds, resumable -> runs/, results/
 uv run python -m thyroid.export --model vit_b16   # -> models/vit_b16.pt for the app
@@ -85,40 +127,59 @@ seconds: add `--smoke`.
 ## Web app
 
 FastAPI backend and React frontend. The backend loads an exported model and returns the
-malignancy probability together with the validation-chosen threshold.
+malignancy probability together with the validation-chosen threshold. The served model is the
+single ViT-B/16 fold with the best validation AUROC (fold 1: 0.679 validation, 0.651 test per
+frame). The ensemble numbers above need all five models.
 
 ```bash
 cd app
 MODEL=vit_b16 docker compose up --build     # UI on http://localhost:3000, API on :8000
 ```
 
-<!-- TODO after training: screenshot -->
+![Web app: upload a frame, get the malignancy probability and the decision](results/figures/app.png)
 
 The app is a research demo. It is not a medical device and must not be used for diagnosis.
 
 ## Project structure
 
+The repository follows the pipeline, from left to right:
+
 ```
-src/thyroid/
-  data/prepare.py      raw archives -> anonymised, deduplicated frames + manifest
-  data/splits.py       patient-level test set and CV folds
-  data/dataset.py      PyTorch dataset and transforms
-  models/              registry; vit_thesis.py and cnn_thesis.py are the thesis architectures
-  train.py             one model x one fold: training, early stopping, test predictions
-  metrics.py           image- and patient-level metrics, thresholds
-  summarize.py         fold aggregation and ensemble -> results/
-  export.py            trained fold -> self-contained file for serving
-notebooks/             01_data (dataset and cleaning), 02_results (after training)
-app/                   FastAPI backend, React frontend, docker-compose
-thesis/                original thesis notebooks (archive) and their known issues
-splits/                manifest and patient split (no personal data)
+download_data.sh -> prepare -> splits -> train (4 models x 5 folds) -> summarize -> export -> app
+```
+
+```
+src/thyroid/                 all Python code, one module per pipeline step
+  data/prepare.py            raw archives -> anonymised, deduplicated frames + manifest
+  data/splits.py             patient-level test set and CV folds
+  data/dataset.py            PyTorch dataset and transforms
+  models/                    registry; vit_thesis.py and cnn_thesis.py are the thesis architectures
+  train.py                   one model x one fold: training, early stopping, test predictions
+  metrics.py                 image- and patient-level metrics, thresholds
+  summarize.py               fold aggregation and ensemble -> results/
+  export.py                  trained fold -> self-contained file for serving
+  explain.py                 Grad-CAM and scoring helpers for the notebooks
+scripts/                     data download and the full training loop
+notebooks/                   01_data (dataset and cleaning), 02_results (metrics, ROC, Grad-CAM, occlusion)
+data/splits/                 manifest and patient split, committed (no personal data)
+results/                     summary tables and README figures
+app/                         FastAPI backend, React frontend, docker-compose
+thesis/                      original thesis notebooks (archive) and their known issues
+
+Generated locally, not committed:
+data/raw/, data/processed/   downloaded archives and cleaned frames
+runs/<model>/fold<k>/        checkpoints, training history, predictions, metrics
+models/                      exported model for the app
 ```
 
 ## Limitations
 
 - The frames carry burned-in scanner UI, including calipers and colour-Doppler boxes that
-  sonographers add to suspicious nodules. A model can exploit them; Grad-CAM in `02_results`
-  checks where the models look.
+  sonographers add to suspicious nodules. The occlusion test rules out the header strip but not
+  overlays that sit on the nodule itself.
+- AUROC 0.75 per patient is far from clinical use. Models are trained per frame with the
+  patient's label; training on all frames of a patient jointly (multiple-instance learning) is
+  the obvious next step.
 - All data comes from one published dataset. There is no external test set from another hospital, so
   the numbers say nothing about generalisation to other scanners or populations.
 - Labels are per patient; individual frames may not show the diagnosed nodule.

@@ -1,0 +1,25 @@
+model,eval,level,auroc,auprc,sensitivity,specificity,balanced_accuracy
+cnn_thesis,"val (fold mean, n=5)",image,0.606 ± 0.029,0.734 ± 0.031,0.449 ± 0.256,0.721 ± 0.211,0.585 ± 0.025
+cnn_thesis,"val (fold mean, n=5)",patient,0.658 ± 0.028,0.769 ± 0.027,0.660 ± 0.183,0.622 ± 0.199,0.641 ± 0.014
+cnn_thesis,"test (fold mean, n=5)",image,0.533 ± 0.029,0.691 ± 0.018,0.413 ± 0.252,0.601 ± 0.241,0.507 ± 0.017
+cnn_thesis,"test (fold mean, n=5)",patient,0.578 ± 0.061,0.669 ± 0.044,0.596 ± 0.176,0.504 ± 0.135,0.550 ± 0.048
+cnn_thesis,test (5-fold ensemble),image,0.550,0.692,0.804,0.299,0.551
+cnn_thesis,test (5-fold ensemble),patient,0.619,0.685,0.861,0.393,0.627
+vit_thesis,"val (fold mean, n=5)",image,0.566 ± 0.013,0.712 ± 0.013,0.662 ± 0.252,0.458 ± 0.262,0.560 ± 0.015
+vit_thesis,"val (fold mean, n=5)",patient,0.597 ± 0.039,0.717 ± 0.037,0.704 ± 0.195,0.498 ± 0.220,0.601 ± 0.021
+vit_thesis,"test (fold mean, n=5)",image,0.456 ± 0.005,0.646 ± 0.005,0.588 ± 0.263,0.373 ± 0.207,0.480 ± 0.029
+vit_thesis,"test (fold mean, n=5)",patient,0.461 ± 0.015,0.627 ± 0.014,0.604 ± 0.220,0.354 ± 0.178,0.479 ± 0.022
+vit_thesis,test (5-fold ensemble),image,0.449,0.642,0.975,0.038,0.507
+vit_thesis,test (5-fold ensemble),patient,0.457,0.626,0.000,1.000,0.500
+resnet50,"val (fold mean, n=5)",image,0.638 ± 0.024,0.763 ± 0.021,0.660 ± 0.131,0.554 ± 0.103,0.607 ± 0.022
+resnet50,"val (fold mean, n=5)",patient,0.701 ± 0.018,0.798 ± 0.018,0.729 ± 0.060,0.638 ± 0.080,0.683 ± 0.023
+resnet50,"test (fold mean, n=5)",image,0.612 ± 0.011,0.736 ± 0.012,0.628 ± 0.127,0.532 ± 0.114,0.580 ± 0.014
+resnet50,"test (fold mean, n=5)",patient,0.678 ± 0.018,0.737 ± 0.015,0.661 ± 0.067,0.593 ± 0.039,0.627 ± 0.025
+resnet50,test (5-fold ensemble),image,0.630,0.746,0.573,0.588,0.581
+resnet50,test (5-fold ensemble),patient,0.696,0.751,0.733,0.571,0.652
+vit_b16,"val (fold mean, n=5)",image,0.666 ± 0.011,0.773 ± 0.024,0.664 ± 0.113,0.595 ± 0.099,0.629 ± 0.013
+vit_b16,"val (fold mean, n=5)",patient,0.750 ± 0.030,0.818 ± 0.027,0.702 ± 0.184,0.747 ± 0.131,0.724 ± 0.030
+vit_b16,"test (fold mean, n=5)",image,0.652 ± 0.026,0.770 ± 0.014,0.675 ± 0.104,0.542 ± 0.097,0.608 ± 0.018
+vit_b16,"test (fold mean, n=5)",patient,0.724 ± 0.027,0.789 ± 0.020,0.687 ± 0.164,0.639 ± 0.096,0.663 ± 0.053
+vit_b16,test (5-fold ensemble),image,0.684,0.781,0.577,0.695,0.636
+vit_b16,test (5-fold ensemble),patient,0.752,0.790,0.644,0.714,0.679

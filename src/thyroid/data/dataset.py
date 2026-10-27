@@ -7,7 +7,7 @@ from torch.utils.data import Dataset
 from torchvision.transforms import v2
 
 IMAGES = Path("data/processed/images")
-SPLITS = Path("splits")
+SPLITS = Path("data/splits")
 
 # Grayscale statistics: ImageNet luma for pretrained stems, a neutral 0.5/0.25 for scratch models.
 PRETRAINED_NORM = ([0.449], [0.226])

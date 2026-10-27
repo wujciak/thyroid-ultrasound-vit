@@ -6,6 +6,5 @@ runs
 models
 thesis
 notebooks
-splits
 app/frontend
 **/__pycache__

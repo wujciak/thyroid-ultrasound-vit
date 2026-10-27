@@ -13,7 +13,7 @@ from pathlib import Path
 
 from sklearn.model_selection import StratifiedGroupKFold
 
-SPLITS = Path("splits")
+SPLITS = Path("data/splits")
 N_FOLDS = 5
 TEST_FRACTION_FOLDS = 5  # 1 of 5 patient groups -> ~20% test
 SEED = 42

@@ -93,7 +93,8 @@ def run_fold(model_name: str, fold: int, args: argparse.Namespace) -> dict:
         lambda s: (s + 1) / warmup if s < warmup else 0.5 * (1 + math.cos(math.pi * (s - warmup) / max(1, steps - warmup))),
     )
 
-    out = RUNS / model_name / f"fold{fold}"
+    # smoke runs get their own directory so they never overwrite a real run
+    out = (RUNS / "smoke" if args.smoke else RUNS) / model_name / f"fold{fold}"
     out.mkdir(parents=True, exist_ok=True)
     y_val = np.array([int(r["label"]) for r in rows["val"]])
     history, best_auroc, stale = [], -1.0, 0

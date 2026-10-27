@@ -4,8 +4,8 @@
 
 Input:  data/raw/figshare/batch{1,2}_image.zip  (scripts/download_data.sh)
 Output: data/processed/images/<patient_id>_<n>.png   grayscale, longer side <= MAX_SIDE
-        splits/manifest.csv                          one row per kept image, no patient names
-        splits/prepare_report.json                   what was dropped and why
+        data/splits/manifest.csv                     one row per kept image, no patient names
+        data/splits/prepare_report.json              what was dropped and why
 
 Patient names exist only in memory: they are mapped to `b1-XXXX` / `b2-XXXX` ids built from the
 dataset's own patient_index, and neither names nor original file names are written anywhere.
@@ -26,7 +26,7 @@ from PIL import Image
 
 RAW = Path("data/raw/figshare")
 OUT_IMAGES = Path("data/processed/images")
-SPLITS = Path("splits")
+SPLITS = Path("data/splits")
 MAX_SIDE = 512
 NEAR_DUP_BITS = 2  # dHash Hamming distance treated as the same image
 NOTES: dict[str, int] = {}  # counts that are not dropped images
